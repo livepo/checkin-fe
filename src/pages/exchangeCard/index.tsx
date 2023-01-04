@@ -1,21 +1,65 @@
 import { View } from '@tarojs/components';
-import { AtButton, AtList, AtListItem } from 'taro-ui';
-import { useState } from 'react';
+import { AtButton, AtList, AtListItem, AtNavBar } from 'taro-ui';
+import { useEffect, useState } from 'react';
+import React from 'react';
+import request from '../../services/request';
+import Taro from '@tarojs/taro';
 
 export default function Index() {
-  const [showList, setShowList] = useState<boolean>(false);
+  const [pairs, setPairs] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const findUsernameByID = (id: number) => {
+    for (let user of users) {
+      console.log('user', user);
+      if (user.id == id) {
+        return user.username;
+      }
+    }
+    return '-';
+  };
+
+  useEffect(() => {
+    request({ url: '/checkin-users' }).then(resp => setUsers(resp.data));
+  }, []);
+
+  useEffect(() => {
+    request({ url: '/exchange-card-pairs' }).then(resp => setPairs(resp.data));
+  }, []);
   return (
     <View>
-      <AtButton onClick={() => setShowList(true)}>随机互送贺卡</AtButton>
-      {showList && (
+      <AtNavBar
+        style={{ marginBottom: '20px' }}
+        onClickLeftIcon={() => Taro.navigateBack()}
+        color="#000"
+        leftIconType="chevron-left"
+      >
+        <View>交换贺卡</View>
+      </AtNavBar>
+      <AtButton
+        onClick={() =>
+          request({
+            url: '/generate-exchange-card-pairs',
+            method: 'POST',
+          }).then(() =>
+            request({ url: '/exchange-card-pairs' }).then(resp =>
+              setPairs(resp.data),
+            ),
+          )
+        }
+      >
+        随机互送贺卡
+      </AtButton>
+      {users && (
         <AtList>
-          <AtListItem title="钱雕 --> 何岩" />
-          <AtListItem title="钱雕 --> 何岩" />
-          <AtListItem title="钱雕 --> 何岩" />
-          <AtListItem title="钱雕 --> 何岩" />
-          <AtListItem title="钱雕 --> 何岩" />
-          <AtListItem title="钱雕 --> 何岩" />
-          <AtListItem title="钱雕 --> 何岩" />
+          {pairs.map(item => (
+            <AtListItem
+              title={
+                findUsernameByID(item.send_id) +
+                '-->' +
+                findUsernameByID(item.recv_id)
+              }
+            />
+          ))}
         </AtList>
       )}
     </View>

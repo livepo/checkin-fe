@@ -1,8 +1,9 @@
 import { View } from '@tarojs/components';
 import React, { useEffect, useState } from 'react';
-import { AtButton, AtList, AtListItem, AtNavBar } from 'taro-ui';
+import { AtNavBar } from 'taro-ui';
 import request from '../../services/request';
 import Taro from '@tarojs/taro';
+import { Swiper, SwiperItem } from '@tarojs/components';
 
 export default function Index() {
   const [users, setUsers] = useState<any[]>([]);
@@ -19,17 +20,15 @@ export default function Index() {
         leftIconType="chevron-left"
         style={{ marginBottom: '20px' }}
       >
-        <View>签到用户列表</View>
+        <View>员工风采展示</View>
       </AtNavBar>
-      <AtList>
-        {users.map(item => (
-          <AtListItem
-            title={item.username}
-            thumb={item.avatar}
-            extraText="删除"
-          />
-        ))}
-      </AtList>
+      <View style={{ margin: '0 auto', textAlign: 'center' }}>
+        <Swiper autoplay>
+          {users.map(item => (
+            <SwiperItem>{item.username}</SwiperItem>
+          ))}
+        </Swiper>
+      </View>
     </View>
   );
 }

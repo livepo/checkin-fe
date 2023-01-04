@@ -1,49 +1,75 @@
 import { View } from '@tarojs/components';
-import { AtTabs, AtTabsPane } from 'taro-ui';
+import React, { useState } from 'react';
+import {
+  AtButton,
+  AtForm,
+  AtInput,
+  AtNavBar,
+  AtTabs,
+  AtTabsPane,
+} from 'taro-ui';
+import request from '../../services/request';
+import Taro from '@tarojs/taro';
 
 export default function Index() {
+  const [current, setCurrent] = useState<number>(0);
+  const [description, setDescription] = useState<string>('');
+  const [amount, setAmount] = useState<number>(0);
+  const tabList = [
+    { title: '一等奖', order: 0 },
+    { title: '二等奖', order: 1 },
+    { title: '三等奖', order: 2 },
+  ];
   return (
     <View>
-      <AtTabs
-        current={this.state.current}
-        scroll
-        tabList={[
-          { title: '标签页1' },
-          { title: '标签页2' },
-          { title: '标签页3' },
-        ]}
-        onClick={this.handleClick.bind(this)}
+      <AtNavBar
+        onClickLeftIcon={() => Taro.navigateBack()}
+        color="#000"
+        leftIconType="chevron-left"
+        style={{ marginBottom: '20px' }}
       >
-        <AtTabsPane current={this.state.current} index={0}>
-          <View style="font-size:18px;text-align:center;height:100px;">
-            标签页一的内容
-          </View>
-        </AtTabsPane>
-        <AtTabsPane current={this.state.current} index={1}>
-          <View style="font-size:18px;text-align:center;height:100px;">
-            标签页二的内容
-          </View>
-        </AtTabsPane>
-        <AtTabsPane current={this.state.current} index={2}>
-          <View style="font-size:18px;text-align:center;height:100px;">
-            标签页三的内容
-          </View>
-        </AtTabsPane>
-        <AtTabsPane current={this.state.current} index={3}>
-          <View style="font-size:18px;text-align:center;height:100px;">
-            标签页四的内容
-          </View>
-        </AtTabsPane>
-        <AtTabsPane current={this.state.current} index={4}>
-          <View style="font-size:18px;text-align:center;height:100px;">
-            标签页五的内容
-          </View>
-        </AtTabsPane>
-        <AtTabsPane current={this.state.current} index={5}>
-          <View style="font-size:18px;text-align:center;height:100px;">
-            标签页六的内容
-          </View>
-        </AtTabsPane>
+        <View>年会抽奖</View>
+      </AtNavBar>
+      <AtTabs
+        current={current}
+        scroll
+        tabList={tabList}
+        onClick={index => setCurrent(index)}
+      >
+        {tabList.map(item => (
+          <AtTabsPane current={item.order} index={item.order}>
+            <AtForm>
+              <AtInput
+                name="description"
+                onChange={(value: string) => setDescription(value)}
+                title="奖品描述"
+              />
+              <AtInput
+                name="amount"
+                type="number"
+                onChange={(value: number) => setAmount(value)}
+                title="中奖人数"
+              />
+              <AtButton
+                type="primary"
+                onClick={() =>
+                  request({
+                    url: '/lottery-setup',
+                    method: 'POST',
+                    data: {
+                      label: tabList[item.order].title,
+                      description: description,
+                      amount: amount,
+                    },
+                  })
+                }
+              >
+                确认
+              </AtButton>
+            </AtForm>
+            <AtButton>开始抽奖</AtButton>
+          </AtTabsPane>
+        ))}
       </AtTabs>
     </View>
   );
